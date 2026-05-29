@@ -3,152 +3,515 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Game</title>
+<title>Number Game Ultra</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial;}
-body{display:flex;justify-content:center;align-items:center;height:100vh;background:linear-gradient(135deg,#0f0f0f,#1c1c1c);}
-.phone{width:360px;height:720px;border-radius:35px;background:#000;box-shadow:0 0 40px #000;border:2px solid #333;overflow:hidden;}
-.top-bar{width:100%;height:35px;background:#222;display:flex;justify-content:space-between;align-items:center;padding:0 10px;color:white;font-size:13px;}
-.screen{padding:10px;height:calc(100% - 35px);display:flex;flex-direction:column;align-items:center;background:#111;}
-.display{width:95%;height:65px;background:#eee;color:#000;font-size:30px;text-align:center;line-height:65px;border-radius:15px;margin:10px 0;font-weight:bold;}
-.keyboard{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;}
-.keyboard button{height:90px;font-size:36px;border-radius:20px;border:none;background:#eee;color:red;font-weight:bold;transition:0.2s;}
-.keyboard button:active{transform:scale(0.95);}
-.actions{display:flex;width:100%;margin-top:10px;}
-.actions button{flex:1;height:60px;margin:0 5px;font-size:20px;border:none;border-radius:15px;}
-.clear{background:#555;color:white;}
-.set{background:#0a84ff;color:white;}
-.message{margin-top:8px;font-size:18px;font-weight:bold;text-align:center;}
-.users{width:95%;margin-top:15px;color:white;overflow:auto;max-height:200px;background:#1a1a1a;padding:8px;border-radius:10px;}
-.users h3{text-align:center;margin-bottom:6px;color:#0af;}
-.users ul{list-style:none;padding:0;}
-.users li{padding:4px 0;border-bottom:1px solid #333;text-align:center;}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Orbitron',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+background:
+radial-gradient(circle at top,#00f7ff33,transparent 30%),
+radial-gradient(circle at bottom,#ff00ff33,transparent 30%),
+linear-gradient(135deg,#050510,#0b0b1f,#111);
+animation:bgMove 8s infinite alternate;
+}
+
+@keyframes bgMove{
+0%{filter:hue-rotate(0deg);}
+100%{filter:hue-rotate(40deg);}
+}
+
+body::before{
+content:'';
+position:absolute;
+width:200%;
+height:200%;
+background-image:
+linear-gradient(#ffffff08 1px,transparent 1px),
+linear-gradient(90deg,#ffffff08 1px,transparent 1px);
+background-size:50px 50px;
+animation:gridMove 20s linear infinite;
+transform:rotate(10deg);
+}
+
+@keyframes gridMove{
+0%{transform:translateY(0) rotate(10deg);}
+100%{transform:translateY(50px) rotate(10deg);}
+}
+
+.phone{
+position:relative;
+width:380px;
+height:760px;
+border-radius:40px;
+overflow:hidden;
+background:rgba(20,20,30,0.75);
+backdrop-filter:blur(25px);
+border:2px solid rgba(255,255,255,0.1);
+box-shadow:
+0 0 30px #00ffff55,
+0 0 80px #ff00ff33,
+inset 0 0 20px #ffffff10;
+animation:float 4s ease-in-out infinite;
+z-index:2;
+}
+
+@keyframes float{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-10px);}
+}
+
+.top-bar{
+height:40px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 15px;
+background:rgba(255,255,255,0.05);
+color:white;
+font-size:14px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.screen{
+padding:15px;
+height:calc(100% - 40px);
+display:flex;
+flex-direction:column;
+align-items:center;
+overflow:hidden;
+}
+
+.logo{
+margin-top:5px;
+font-size:28px;
+font-weight:bold;
+background:linear-gradient(90deg,cyan,magenta);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+text-shadow:0 0 20px cyan;
+animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{text-shadow:0 0 10px cyan;}
+to{text-shadow:0 0 25px magenta;}
+}
+
+.display{
+width:100%;
+height:90px;
+margin-top:20px;
+border-radius:25px;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:42px;
+font-weight:bold;
+color:#fff;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:
+inset 0 0 20px #00ffff22,
+0 0 25px #00ffff22;
+letter-spacing:3px;
+backdrop-filter:blur(10px);
+transition:0.3s;
+}
+
+.keyboard{
+margin-top:25px;
+width:100%;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:14px;
+}
+
+.keyboard button{
+height:90px;
+border:none;
+border-radius:25px;
+font-size:34px;
+font-weight:bold;
+color:white;
+cursor:pointer;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:
+0 0 15px #00ffff22,
+inset 0 0 10px #ffffff10;
+transition:0.2s;
+position:relative;
+overflow:hidden;
+}
+
+.keyboard button::before{
+content:'';
+position:absolute;
+top:-100%;
+left:-100%;
+width:300%;
+height:300%;
+background:linear-gradient(45deg,transparent,#ffffff22,transparent);
+transform:rotate(45deg);
+animation:shine 4s linear infinite;
+}
+
+@keyframes shine{
+0%{transform:translateX(-200%) rotate(45deg);}
+100%{transform:translateX(200%) rotate(45deg);}
+}
+
+.keyboard button:hover{
+transform:translateY(-4px) scale(1.03);
+box-shadow:
+0 0 25px cyan,
+0 0 40px magenta;
+}
+
+.keyboard button:active{
+transform:scale(0.92);
+}
+
+.actions{
+display:flex;
+width:100%;
+margin-top:18px;
+gap:10px;
+}
+
+.actions button{
+flex:1;
+height:65px;
+border:none;
+border-radius:22px;
+font-size:20px;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+
+.clear{
+background:linear-gradient(135deg,#444,#666);
+color:white;
+box-shadow:0 0 20px #ffffff22;
+}
+
+.set{
+background:linear-gradient(135deg,#00ffff,#ff00ff);
+color:white;
+box-shadow:0 0 25px #00ffff88;
+}
+
+.actions button:hover{
+transform:translateY(-3px);
+filter:brightness(1.1);
+}
+
+.message{
+margin-top:18px;
+font-size:22px;
+font-weight:bold;
+min-height:35px;
+text-align:center;
+text-shadow:0 0 15px currentColor;
+animation:pulse 1.2s infinite;
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1);}
+50%{transform:scale(1.05);}
+}
+
+.users{
+margin-top:18px;
+width:100%;
+flex:1;
+overflow:auto;
+border-radius:25px;
+padding:15px;
+background:rgba(255,255,255,0.05);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:inset 0 0 20px #ffffff10;
+}
+
+.users::-webkit-scrollbar{
+width:6px;
+}
+
+.users::-webkit-scrollbar-thumb{
+background:cyan;
+border-radius:20px;
+}
+
+.users h3{
+text-align:center;
+margin-bottom:12px;
+font-size:22px;
+color:cyan;
+text-shadow:0 0 15px cyan;
+}
+
+.users ul{
+list-style:none;
+}
+
+.users li{
+padding:12px;
+margin:8px 0;
+border-radius:16px;
+background:rgba(255,255,255,0.05);
+color:white;
+text-align:center;
+font-size:18px;
+transition:0.3s;
+border:1px solid rgba(255,255,255,0.05);
+}
+
+.users li:hover{
+transform:scale(1.03);
+background:rgba(0,255,255,0.12);
+box-shadow:0 0 15px cyan;
+}
+
+.particles{
+position:absolute;
+width:100%;
+height:100%;
+overflow:hidden;
+z-index:0;
+}
+
+.particles span{
+position:absolute;
+display:block;
+width:4px;
+height:4px;
+background:white;
+border-radius:50%;
+animation:particle 10s linear infinite;
+opacity:0.7;
+}
+
+@keyframes particle{
+0%{
+transform:translateY(100vh) scale(0);
+opacity:0;
+}
+20%{
+opacity:1;
+}
+100%{
+transform:translateY(-120vh) scale(1.5);
+opacity:0;
+}
+}
+
 </style>
 </head>
 
 <body>
 
+<div class="particles" id="particles"></div>
+
 <div class="phone">
-  <div class="top-bar">
-    <div>📶</div>
-    <div>Number Game</div>
-    <div>🔋</div>
-  </div>
 
-  <div class="screen">
+<div class="top-bar">
+<div>📶 5G</div>
+<div>12:00</div>
+<div>🔋100%</div>
+</div>
 
-      <div class="display" id="display">---</div>
+<div class="screen">
 
-      <div class="keyboard">
-        <button onclick="pressNum(1)">1</button>
-        <button onclick="pressNum(2)">2</button>
-        <button onclick="pressNum(3)">3</button>
-        <button onclick="pressNum(4)">4</button>
-        <button onclick="pressNum(5)">5</button>
-        <button onclick="pressNum(6)">6</button>
-        <button onclick="pressNum(7)">7</button>
-        <button onclick="pressNum(8)">8</button>
-        <button onclick="pressNum(9)">9</button>
-        <button onclick="pressNum(0)">0</button>
-      </div>
+<div class="logo">NUMBER GAME</div>
 
-      <div class="actions">
-        <button class="clear" onclick="clearGuess()">Clear</button>
-        <button class="set" onclick="setGuess()">Set</button>
-      </div>
+<div class="display" id="display">---</div>
 
-      <div id="message" class="message"></div>
+<div class="keyboard">
+<button onclick="pressNum(1)">1</button>
+<button onclick="pressNum(2)">2</button>
+<button onclick="pressNum(3)">3</button>
+<button onclick="pressNum(4)">4</button>
+<button onclick="pressNum(5)">5</button>
+<button onclick="pressNum(6)">6</button>
+<button onclick="pressNum(7)">7</button>
+<button onclick="pressNum(8)">8</button>
+<button onclick="pressNum(9)">9</button>
+<button onclick="pressNum(0)">0</button>
+</div>
 
-      <div class="users">
-        <h3>All Users</h3>
-        <ul id="users_list"></ul>
-      </div>
+<div class="actions">
+<button class="clear" onclick="clearGuess()">CLEAR</button>
+<button class="set" onclick="setGuess()">SET</button>
+</div>
 
-  </div>
+<div id="message" class="message"></div>
+
+<div class="users">
+<h3>ONLINE USERS</h3>
+<ul id="users_list"></ul>
+</div>
+
+</div>
 </div>
 
 <script>
+
 let currentGuess = "";
 let secretNumber = Math.floor(Math.random()*500000)+1;
 
-// گرفتن لیست کاربران
+// particles
+for(let i=0;i<70;i++){
+let p=document.createElement("span");
+p.style.left=Math.random()*100+"%";
+p.style.animationDuration=(Math.random()*10+5)+"s";
+p.style.animationDelay=(Math.random()*5)+"s";
+p.style.opacity=Math.random();
+document.getElementById("particles").appendChild(p);
+}
+
+// clock
+setInterval(()=>{
+let d=new Date();
+let h=d.getHours().toString().padStart(2,"0");
+let m=d.getMinutes().toString().padStart(2,"0");
+document.querySelector(".top-bar div:nth-child(2)").innerText=h+":"+m;
+},1000);
+
+// users
 function getUsers(){
-    return JSON.parse(localStorage.getItem("allUsers") || "[]");
+return JSON.parse(localStorage.getItem("allUsers") || "[]");
 }
 
-// ذخیره لیست کاربران
 function saveUsers(users){
-    localStorage.setItem("allUsers", JSON.stringify(users));
+localStorage.setItem("allUsers", JSON.stringify(users));
 }
 
-// ساخت کاربر اگر وجود نداشت
 function createUserIfNotExists(){
-    let myUser = localStorage.getItem("myUser");
-    if(!myUser){
-        let users = getUsers();
-        let newName;
-        do{
-            newName = "user" + Math.floor(Math.random()*9000+1000);
-        }while(users.includes(newName));
-        users.push(newName);
-        saveUsers(users);
-        localStorage.setItem("myUser", newName);
-        return newName;
-    }
-    return myUser;
+let myUser = localStorage.getItem("myUser");
+
+if(!myUser){
+
+let users = getUsers();
+let newName;
+
+do{
+newName="user"+Math.floor(Math.random()*9000+1000);
+}while(users.includes(newName));
+
+users.push(newName);
+
+saveUsers(users);
+
+localStorage.setItem("myUser",newName);
+
+return newName;
 }
 
-// نمایش کاربران
+return myUser;
+}
+
 function updateUsers(){
-    let users = getUsers();
-    let list = "";
-    users.forEach(u=>{
-        list += "<li>"+u+"</li>";
-    });
-    document.getElementById("users_list").innerHTML = list;
+
+let users = getUsers();
+
+let list = "";
+
+users.forEach(u=>{
+
+list += `
+<li>
+⚡ ${u}
+</li>
+`;
+
+});
+
+document.getElementById("users_list").innerHTML = list;
 }
 
-// دکمه ها
 function pressNum(n){
-    currentGuess += n;
-    document.getElementById("display").innerText = currentGuess;
+
+if(currentGuess.length >= 8) return;
+
+currentGuess += n;
+
+document.getElementById("display").innerText=currentGuess;
+
+navigator.vibrate?.(30);
 }
 
 function clearGuess(){
-    currentGuess = "";
-    document.getElementById("display").innerText = "---";
+
+currentGuess="";
+
+document.getElementById("display").innerText="---";
+
+showMessage("CLEARED","#aaa");
 }
 
 function setGuess(){
-    if(currentGuess === "") return;
 
-    createUserIfNotExists(); // ساخت کاربر در اولین Set
+if(currentGuess==="") return;
 
-    let guess = parseInt(currentGuess);
+createUserIfNotExists();
 
-    if(guess < secretNumber){
-        showMessage("Higher 🔼","yellow");
-    }else if(guess > secretNumber){
-        showMessage("Lower 🔽","lightgreen");
-    }else{
-        showMessage("🎉 Correct!","cyan");
-        secretNumber = Math.floor(Math.random()*500000)+1;
-    }
+let guess=parseInt(currentGuess);
 
-    currentGuess="";
-    document.getElementById("display").innerText="---";
-    updateUsers();
+if(guess < secretNumber){
+
+showMessage("HIGHER 🔼","#ffe600");
+
+}else if(guess > secretNumber){
+
+showMessage("LOWER 🔽","#00ff99");
+
+}else{
+
+showMessage("🎉 CORRECT!","#00ffff");
+
+secretNumber=Math.floor(Math.random()*500000)+1;
+}
+
+currentGuess="";
+
+document.getElementById("display").innerText="---";
+
+updateUsers();
 }
 
 function showMessage(msg,color){
-    let m = document.getElementById("message");
-    m.innerText = msg;
-    m.style.color = color;
+
+let m=document.getElementById("message");
+
+m.innerText=msg;
+
+m.style.color=color;
+
+m.style.transform="scale(1.2)";
+
+setTimeout(()=>{
+m.style.transform="scale(1)";
+},200);
 }
 
-// بارگذاری اولیه
 updateUsers();
+
 </script>
 
 </body>
