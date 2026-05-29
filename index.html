@@ -3,120 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Media Upload</title>
+<title>Ghost Media Cloud</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
+
+:root{
+--bg:#050816;
+--card:#101827;
+--cyan:#00f0ff;
+--pink:#ff00ff;
+--green:#00ff99;
+--text:#ffffff;
+--soft:#94a3b8;
+}
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial;
+font-family:Arial,sans-serif;
+-webkit-tap-highlight-color:transparent;
 }
 
 body{
-background:#050505;
-overflow-x:hidden;
+background:#050816;
 color:white;
+overflow-x:hidden;
 min-height:100vh;
 }
 
+/* animated background */
+
 .bg{
 position:fixed;
-width:100%;
-height:100%;
-background:
-radial-gradient(circle at top left,#00f0ff33,transparent 30%),
-radial-gradient(circle at bottom right,#ff00ff33,transparent 30%),
-#050505;
+inset:0;
+overflow:hidden;
 z-index:-1;
-animation:bgmove 10s linear infinite alternate;
 }
 
-@keyframes bgmove{
-0%{filter:hue-rotate(0deg);}
-100%{filter:hue-rotate(90deg);}
+.blob{
+position:absolute;
+border-radius:50%;
+filter:blur(100px);
+opacity:.22;
+animation:move 18s linear infinite alternate;
 }
 
-.container{
-width:95%;
-max-width:900px;
-margin:auto;
-padding:20px;
+.blob1{
+width:320px;
+height:320px;
+background:cyan;
+top:-80px;
+left:-80px;
 }
 
-.title{
-font-size:40px;
-font-weight:bold;
-text-align:center;
-margin-top:20px;
-background:linear-gradient(90deg,#00f0ff,#ff00ff);
+.blob2{
+width:350px;
+height:350px;
+background:#ff00ff;
+bottom:-120px;
+right:-120px;
+animation-duration:25s;
+}
+
+@keyframes move{
+0%{
+transform:translate(0,0);
+}
+100%{
+transform:translate(60px,-40px);
+}
+}
+
+/* navbar */
+
+.nav{
+height:70px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+background:rgba(255,255,255,.03);
+backdrop-filter:blur(20px);
+border-bottom:1px solid rgba(255,255,255,.05);
+position:sticky;
+top:0;
+z-index:100;
+}
+
+.logo{
+font-size:28px;
+font-weight:900;
+background:linear-gradient(90deg,var(--cyan),var(--pink));
 -webkit-background-clip:text;
 -webkit-text-fill-color:transparent;
 }
 
-.uploadBox{
-margin-top:30px;
-border:2px dashed #00f0ff;
-border-radius:25px;
-padding:50px 20px;
+.status{
+padding:10px 18px;
+border-radius:20px;
+background:#00ff9920;
+color:#00ff99;
+font-size:14px;
+font-weight:bold;
+box-shadow:0 0 20px #00ff9940;
+}
+
+/* container */
+
+.container{
+width:95%;
+max-width:1200px;
+margin:auto;
+padding:25px 0;
+}
+
+/* hero */
+
+.hero{
 text-align:center;
-background:#111;
-transition:.3s;
+margin-top:20px;
+}
+
+.hero h1{
+font-size:55px;
+font-weight:900;
+line-height:1.1;
+}
+
+.hero p{
+margin-top:15px;
+font-size:18px;
+color:var(--soft);
+}
+
+/* upload box */
+
+.upload-box{
+margin-top:35px;
+padding:35px;
+border-radius:35px;
+background:rgba(255,255,255,.04);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,.06);
+box-shadow:
+0 0 40px #00000060,
+0 0 30px #00f0ff20;
+}
+
+.drop{
+height:270px;
+border:2px dashed #00f0ff66;
+border-radius:30px;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+cursor:pointer;
+transition:.25s;
+background:#0b1220;
 position:relative;
 overflow:hidden;
 }
 
-.uploadBox:hover{
+.drop:hover{
 transform:scale(1.01);
-box-shadow:0 0 40px #00f0ff55;
+border-color:var(--cyan);
+box-shadow:0 0 30px #00f0ff40;
 }
 
-.uploadBox input{
+.drop-icon{
+font-size:90px;
+}
+
+.drop h2{
+margin-top:15px;
+font-size:30px;
+}
+
+.drop p{
+margin-top:10px;
+color:#9ca3af;
+font-size:16px;
+}
+
+input{
 display:none;
 }
 
-.uploadBtn{
-padding:15px 35px;
-border:none;
-border-radius:20px;
-background:linear-gradient(45deg,#00f0ff,#ff00ff);
-color:white;
-font-size:18px;
-cursor:pointer;
-font-weight:bold;
+/* info grid */
+
+.grid{
+margin-top:25px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+}
+
+.card{
+background:#0f172a;
+padding:18px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,.04);
+}
+
+.card h3{
+font-size:14px;
+color:#94a3b8;
+}
+
+.card b{
+display:block;
+margin-top:10px;
+font-size:24px;
+}
+
+/* progress */
+
+.progress-wrap{
+margin-top:25px;
+display:none;
 }
 
 .progress{
-margin-top:20px;
-height:20px;
-background:#222;
-border-radius:20px;
+height:24px;
+background:#0f172a;
+border-radius:30px;
 overflow:hidden;
-display:none;
+border:1px solid rgba(255,255,255,.05);
 }
 
-.progress div{
+.bar{
 height:100%;
 width:0%;
-background:linear-gradient(90deg,#00f0ff,#ff00ff);
+background:linear-gradient(90deg,var(--cyan),var(--pink));
 transition:.2s;
 }
+
+.uploading{
+margin-top:12px;
+font-size:15px;
+color:#cbd5e1;
+}
+
+/* gallery */
 
 .gallery{
 margin-top:40px;
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-gap:20px;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:22px;
 }
 
-.card{
-background:#111;
-border-radius:20px;
+.media-card{
+background:#0b1220;
+border-radius:28px;
 overflow:hidden;
-box-shadow:0 0 20px #000;
-animation:fade .5s ease;
+border:1px solid rgba(255,255,255,.05);
+animation:fade .35s ease;
 }
 
 @keyframes fade{
@@ -130,85 +276,211 @@ transform:none;
 }
 }
 
-.card img,
-.card video{
+.media-card img,
+.media-card video{
 width:100%;
-max-height:250px;
+max-height:320px;
 object-fit:cover;
 background:black;
 }
 
-.info{
-padding:15px;
+.audioBox{
+padding:40px 20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+background:#111827;
 }
 
-.link{
-display:block;
-margin-top:10px;
-padding:10px;
-text-align:center;
-background:#00f0ff22;
-border-radius:12px;
-color:#00f0ff;
-text-decoration:none;
+.audioIcon{
+font-size:90px;
+}
+
+audio{
+width:100%;
+margin-top:20px;
+}
+
+.info{
+padding:20px;
+}
+
+.filename{
+font-size:20px;
+font-weight:bold;
 word-break:break-all;
 }
 
-.copy{
+.meta{
 margin-top:10px;
-width:100%;
-padding:10px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.tag{
+padding:8px 14px;
+border-radius:14px;
+background:#00f0ff20;
+color:#00f0ff;
+font-size:13px;
+}
+
+.link{
+margin-top:18px;
+display:block;
+padding:12px;
+border-radius:16px;
+background:#111827;
+color:#fff;
+word-break:break-all;
+text-decoration:none;
+}
+
+.buttons{
+margin-top:15px;
+display:flex;
+gap:10px;
+}
+
+.btn{
+flex:1;
+height:50px;
 border:none;
-border-radius:12px;
-background:#ff00ff;
-color:white;
+border-radius:16px;
+font-size:15px;
 font-weight:bold;
 cursor:pointer;
+color:white;
 }
 
-.live{
+.copy{
+background:linear-gradient(90deg,var(--cyan),var(--pink));
+}
+
+.open{
+background:#1f2937;
+}
+
+/* toast */
+
+.toast{
 position:fixed;
-top:10px;
-right:10px;
-padding:10px 15px;
+bottom:20px;
+right:20px;
+padding:15px 20px;
 background:#00ff99;
-border-radius:20px;
-font-size:14px;
+color:black;
 font-weight:bold;
-box-shadow:0 0 20px #00ff99;
-animation:pulse 1s infinite;
+border-radius:18px;
+display:none;
+z-index:999;
+box-shadow:0 0 30px #00ff99;
 }
 
-@keyframes pulse{
-0%{transform:scale(1);}
-50%{transform:scale(1.05);}
-100%{transform:scale(1);}
+/* responsive */
+
+@media(max-width:700px){
+
+.hero h1{
+font-size:38px;
 }
+
+.drop{
+height:220px;
+}
+
+.gallery{
+grid-template-columns:1fr;
+}
+
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
+<div class="bg">
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+</div>
 
-<div class="live">● LIVE SERVER</div>
+<div class="nav">
+<div class="logo">GHOST CLOUD</div>
+<div class="status">● ONLINE</div>
+</div>
 
 <div class="container">
 
-<div class="title">
-MEDIA CLOUD
+<div class="hero">
+
+<h1>
+UPLOAD MEDIA<br>
+WITHOUT LIMITS
+</h1>
+
+<p>
+Photos • Videos • Music • Private Links • Real Cloud
+</p>
+
 </div>
 
-<div class="uploadBox" onclick="pickFile()">
-<h2>Upload Photo Or Video</h2>
-<br>
-<button class="uploadBtn">
-Choose File
-</button>
+<div class="upload-box">
 
-<input type="file" id="fileInput" accept="image/*,video/*">
+<label class="drop" id="drop">
+
+<div class="drop-icon">☁️</div>
+
+<h2>Drop Files Here</h2>
+
+<p>
+Images, Videos, Music • Max 40MB
+</p>
+
+<input
+type="file"
+id="fileInput"
+accept="image/*,video/*,audio/*"
+>
+
+</label>
+
+<div class="grid">
+
+<div class="card">
+<h3>MAX SIZE</h3>
+<b>40MB</b>
+</div>
+
+<div class="card">
+<h3>SUPPORTED</h3>
+<b>PNG MP4 MP3</b>
+</div>
+
+<div class="card">
+<h3>UPLOAD MODE</h3>
+<b>LIVE</b>
+</div>
+
+<div class="card">
+<h3>STORAGE</h3>
+<b>SUPABASE</b>
+</div>
+
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+
 <div class="progress">
-<div id="bar"></div>
+<div class="bar" id="bar"></div>
+</div>
+
+<div class="uploading" id="uploading">
+Uploading...
+</div>
+
 </div>
 
 </div>
@@ -217,122 +489,345 @@ Choose File
 
 </div>
 
+<div class="toast" id="toast">
+Copied Link
+</div>
+
 <script>
 
-const SUPABASE_URL = "https://tyxozdllmnfnonjirath.supabase.co";
+/* ========================= */
+/* CONFIG */
+/* ========================= */
 
-const SUPABASE_KEY = "sb_publishable_lI8fDXUKUYzqZKZ6KcDFVA_g9G0uztm";
+const SUPABASE_URL =
+"https://tyxozdllmnfnonjirath.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_lI8fDXUKUYzqZKZ6KcDFVA_g9G0uztm";
 
 const client = supabase.createClient(
 SUPABASE_URL,
 SUPABASE_KEY
 );
 
-const input = document.getElementById("fileInput");
-const gallery = document.getElementById("gallery");
-const progress = document.querySelector(".progress");
-const bar = document.getElementById("bar");
+/* ========================= */
 
-function pickFile(){
-input.click();
-}
+const input =
+document.getElementById("fileInput");
 
-input.addEventListener("change", async ()=>{
+const drop =
+document.getElementById("drop");
+
+const gallery =
+document.getElementById("gallery");
+
+const progressWrap =
+document.getElementById("progressWrap");
+
+const bar =
+document.getElementById("bar");
+
+const uploading =
+document.getElementById("uploading");
+
+const toast =
+document.getElementById("toast");
+
+/* click */
+
+drop.onclick = ()=> input.click();
+
+/* drag */
+
+drop.addEventListener("dragover",(e)=>{
+e.preventDefault();
+drop.style.borderColor="#00f0ff";
+});
+
+drop.addEventListener("dragleave",()=>{
+drop.style.borderColor="#00f0ff66";
+});
+
+drop.addEventListener("drop",(e)=>{
+e.preventDefault();
+
+const file = e.dataTransfer.files[0];
+
+handleFile(file);
+});
+
+/* file input */
+
+input.addEventListener("change",()=>{
 
 const file = input.files[0];
-if(!file) return;
 
-progress.style.display="block";
+handleFile(file);
 
-let percent = 0;
+});
+
+/* upload */
+
+async function handleFile(file){
+
+if(!file)return;
+
+/* size limit */
+
+if(file.size > 40 * 1024 * 1024){
+
+alert("Max file size is 40MB");
+
+return;
+
+}
+
+/* allowed */
+
+const allowed =
+[
+"image/",
+"video/",
+"audio/"
+];
+
+let ok = false;
+
+for(let i of allowed){
+
+if(file.type.startsWith(i)){
+ok = true;
+}
+
+}
+
+if(!ok){
+
+alert("Only image/video/audio");
+
+return;
+
+}
+
+progressWrap.style.display="block";
+
+bar.style.width="0%";
+
+let progress = 0;
 
 const fake = setInterval(()=>{
-percent+=5;
-if(percent<=90){
-bar.style.width=percent+"%";
+
+progress += 4;
+
+if(progress <= 90){
+
+bar.style.width = progress + "%";
+
+uploading.innerText =
+"Uploading " + progress + "%";
+
 }
+
 },100);
 
-const ext = file.name.split(".").pop();
+/* filename */
+
+const ext =
+file.name.split(".").pop();
 
 const random =
-Math.random().toString(36).substring(2,10);
+Math.random().toString(36)
+.substring(2,10);
 
 const filename =
-Date.now()+"_"+random+"."+ext;
+Date.now() +
+"_" +
+random +
+"." +
+ext;
 
-const { error } = await client.storage
+/* upload */
+
+const { error } =
+await client.storage
 .from("files")
 .upload(filename,file);
 
 clearInterval(fake);
 
 if(error){
+
 alert(error.message);
+
+progressWrap.style.display="none";
+
 return;
+
 }
 
 bar.style.width="100%";
 
-setTimeout(()=>{
-progress.style.display="none";
-bar.style.width="0%";
-},1000);
+uploading.innerText =
+"Upload Complete";
 
-const { data } = client.storage
+/* public url */
+
+const { data } =
+client.storage
 .from("files")
 .getPublicUrl(filename);
 
 const url = data.publicUrl;
 
-addCard(url,file.type);
+setTimeout(()=>{
 
-});
+progressWrap.style.display="none";
 
-function addCard(url,type){
+},1200);
 
-const card = document.createElement("div");
-card.className="card";
+/* add card */
 
-let media="";
+createCard(
+url,
+file,
+filename
+);
 
-if(type.startsWith("image")){
-media = `<img src="${url}">`;
-}else{
-media = `
+}
+
+/* create media */
+
+function createCard(
+url,
+file,
+filename
+){
+
+const card =
+document.createElement("div");
+
+card.className =
+"media-card";
+
+let media = "";
+
+/* image */
+
+if(file.type.startsWith("image")){
+
+media =
+`<img src="${url}">`;
+
+}
+
+/* video */
+
+else if(file.type.startsWith("video")){
+
+media =
+`
 <video controls>
 <source src="${url}">
 </video>
 `;
+
 }
 
-card.innerHTML = `
-${media}
+/* audio */
 
-<div class="info">
+else{
 
-<div>
-Secret Link
+media =
+`
+<div class="audioBox">
+
+<div class="audioIcon">
+🎵
 </div>
 
-<a class="link" href="${url}" target="_blank">
-${url}
-</a>
-
-<button class="copy">
-Copy Link
-</button>
+<audio controls>
+<source src="${url}">
+</audio>
 
 </div>
 `;
 
+}
+
+const size =
+(file.size / 1024 / 1024)
+.toFixed(2);
+
+card.innerHTML = `
+
+${media}
+
+<div class="info">
+
+<div class="filename">
+${filename}
+</div>
+
+<div class="meta">
+
+<div class="tag">
+${file.type}
+</div>
+
+<div class="tag">
+${size} MB
+</div>
+
+</div>
+
+<a
+class="link"
+href="${url}"
+target="_blank"
+>
+${url}
+</a>
+
+<div class="buttons">
+
+<button
+class="btn copy"
+onclick="copyLink('${url}')"
+>
+COPY
+</button>
+
+<button
+class="btn open"
+onclick="window.open('${url}')"
+>
+OPEN
+</button>
+
+</div>
+
+</div>
+
+`;
+
 gallery.prepend(card);
 
-card.querySelector(".copy")
-.onclick = ()=>{
-navigator.clipboard.writeText(url);
-alert("Copied");
-};
+}
+
+/* copy */
+
+function copyLink(url){
+
+navigator.clipboard
+.writeText(url);
+
+toast.style.display="block";
+
+setTimeout(()=>{
+
+toast.style.display="none";
+
+},2000);
 
 }
 
