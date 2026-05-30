@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Dea Upload</title>
 
@@ -14,37 +14,51 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial;
+font-family:sans-serif;
 }
 
 body{
 background:#0f172a;
 color:white;
+min-height:100vh;
 padding:20px;
 }
 
 .container{
-max-width:1000px;
+max-width:900px;
 margin:auto;
 }
 
 .card{
 background:#1e293b;
-padding:20px;
 border-radius:20px;
+padding:25px;
 margin-bottom:20px;
+box-shadow:0 0 30px rgba(0,0,0,.3);
 }
 
 h1{
+text-align:center;
 margin-bottom:15px;
 }
 
-input{
+.subtitle{
+text-align:center;
+opacity:.8;
+margin-bottom:25px;
+}
+
+.upload-box{
+border:2px dashed #38bdf8;
+padding:30px;
+border-radius:20px;
+text-align:center;
+}
+
+input[type=file]{
+display:block;
 width:100%;
-padding:15px;
-border-radius:12px;
-border:none;
-margin-top:10px;
+margin-top:15px;
 }
 
 button{
@@ -52,15 +66,21 @@ width:100%;
 padding:15px;
 border:none;
 border-radius:12px;
-font-weight:bold;
+background:#38bdf8;
+color:white;
+font-size:16px;
 cursor:pointer;
-margin-top:10px;
+margin-top:15px;
+}
+
+button:hover{
+opacity:.9;
 }
 
 .progress{
-height:20px;
+height:22px;
 background:#334155;
-border-radius:20px;
+border-radius:30px;
 overflow:hidden;
 margin-top:15px;
 }
@@ -72,29 +92,46 @@ background:#22c55e;
 transition:.3s;
 }
 
-.file{
-background:#334155;
-padding:12px;
+.preview{
+margin-top:20px;
+text-align:center;
+}
+
+.preview img{
+max-width:100%;
+border-radius:15px;
+}
+
+.preview video{
+width:100%;
+border-radius:15px;
+}
+
+.preview audio{
+width:100%;
+}
+
+.linkbox{
+margin-top:15px;
+background:#0f172a;
+padding:15px;
 border-radius:12px;
-margin-top:10px;
 word-break:break-all;
 }
 
 a{
 color:#38bdf8;
-text-decoration:none;
-}
-
-canvas{
-width:100%;
-height:300px;
-background:#111827;
-border-radius:15px;
 }
 
 .info{
-margin-top:10px;
-line-height:1.8;
+margin-top:15px;
+line-height:2;
+}
+
+.footer{
+text-align:center;
+opacity:.6;
+margin-top:20px;
 }
 
 </style>
@@ -105,40 +142,36 @@ line-height:1.8;
 
 <div class="card">
 
-<h1>Upload Center</h1>
+<h1>Dea Upload</h1>
+
+<div class="subtitle">
+Image • Video • Audio Upload
+</div>
+
+<div class="upload-box">
+
+انتخاب فایل
 
 <input id="file" type="file">
 
 <button onclick="uploadFile()">
-UPLOAD
+آپلود فایل
 </button>
 
 <div class="progress">
 <div id="bar" class="bar"></div>
 </div>
 
-<div class="info" id="status"></div>
+<div id="status" class="info"></div>
+
+<div id="preview" class="preview"></div>
 
 </div>
 
-<div class="card">
-
-<h2>Today's Upload Chart</h2>
-
-<canvas
-id="chart"
-width="900"
-height="300">
-</canvas>
-
 </div>
 
-<div class="card">
-
-<h2>Recent Uploads</h2>
-
-<div id="files"></div>
-
+<div class="footer">
+Max File Size : 30MB
 </div>
 
 </div>
@@ -157,7 +190,10 @@ SUPABASE_URL,
 SUPABASE_KEY
 );
 
-const allowedMime = [
+const MAX_SIZE =
+30 * 1024 * 1024;
+
+const allowed = [
 
 "image/jpeg",
 "image/png",
@@ -172,323 +208,150 @@ const allowedMime = [
 
 ];
 
-const allowedExt = [
-
-"jpg",
-"jpeg",
-"png",
-"webp",
-
-"mp4",
-"webm",
-
-"mp3",
-"wav",
-"ogg"
-
-];
-
-const MAX_SIZE =
-30 * 1024 * 1024;
-
 async function uploadFile(){
 
 const file =
 document.getElementById("file").files[0];
 
 if(!file){
-
-alert("Select file");
-
+alert("فایل انتخاب نشده");
 return;
-
 }
 
 if(file.size > MAX_SIZE){
-
-alert("Max 30MB");
-
+alert("حداکثر حجم 30MB");
 return;
+}
 
+if(!allowed.includes(file.type)){
+alert("فقط عکس، فیلم یا آهنگ");
+return;
 }
 
 const ext =
-file.name
-.split(".")
-.pop()
-.toLowerCase();
-
-if(
-!allowedMime.includes(file.type)
-||
-!allowedExt.includes(ext)
-){
-
-alert("File type not allowed");
-
-return;
-
-}
+file.name.split(".").pop();
 
 const fileName =
-Date.now()
-+
-"_"
-+
+Date.now() +
+"_" +
 Math.random()
 .toString(36)
-.slice(2,8)
+.substring(2,8)
 +
-"."
-+
+"." +
 ext;
 
 document.getElementById("status")
 .innerHTML =
-"Uploading...";
+"در حال آپلود...";
 
 document.getElementById("bar")
-.style.width =
-"50%";
+.style.width="20%";
 
-const upload =
-await supabase
-.storage
+const result =
+await supabase.storage
 .from("files")
 .upload(
 fileName,
 file
 );
 
-if(upload.error){
+if(result.error){
 
-alert(upload.error.message);
+document.getElementById("status")
+.innerHTML =
+result.error.message;
 
 return;
 
 }
 
 document.getElementById("bar")
-.style.width =
-"100%";
+.style.width="100%";
 
-await supabase
-.from("uploads")
-.insert({
-
-filename:fileName,
-
-filetype:file.type,
-
-created_at:
-new Date()
-.toISOString()
-
-});
-
-const customLink =
-
-location.origin
-+
-"/f/"
-+
+const fileUrl =
+SUPABASE_URL +
+"/storage/v1/object/public/files/" +
 fileName;
+
+let preview="";
+
+if(file.type.startsWith("image/")){
+
+preview =
+`<img src="${fileUrl}">`;
+
+}
+
+else if(
+file.type.startsWith("video/")
+){
+
+preview =
+`<video controls src="${fileUrl}"></video>`;
+
+}
+
+else if(
+file.type.startsWith("audio/")
+){
+
+preview =
+`<audio controls src="${fileUrl}"></audio>`;
+
+}
+
+document.getElementById("preview")
+.innerHTML =
+preview;
 
 document.getElementById("status")
 .innerHTML =
 
 `
-Uploaded Successfully
+فایل با موفقیت آپلود شد
 
-<br><br>
+<div class="linkbox">
 
-<a href="${customLink}"
+<a href="${fileUrl}"
 target="_blank">
 
-${customLink}
-
-</a>
-`;
-
-loadFiles();
-
-drawChart();
-
-}
-
-async function loadFiles(){
-
-const box =
-document.getElementById("files");
-
-box.innerHTML =
-"Loading...";
-
-const result =
-await supabase
-.from("uploads")
-.select("*")
-.order(
-"created_at",
-{
-ascending:false
-}
-)
-.limit(30);
-
-box.innerHTML="";
-
-result.data.forEach(item=>{
-
-const link =
-
-location.origin
-+
-"/f/"
-+
-item.filename;
-
-box.innerHTML +=
-
-`
-<div class="file">
-
-<b>${item.filename}</b>
-
-<br>
-
-${item.filetype}
-
-<br>
-
-${new Date(
-item.created_at
-).toLocaleString()}
-
-<br><br>
-
-<a href="${link}"
-target="_blank">
-
-${link}
+${fileUrl}
 
 </a>
 
 </div>
+
+<div class="info">
+
+نام فایل:
+${fileName}
+
+<br>
+
+حجم:
+${(
+file.size /
+1024 /
+1024
+).toFixed(2)}
+ MB
+
+<br>
+
+نوع:
+${file.type}
+
+<br>
+
+زمان:
+${new Date()
+.toLocaleString()}
+
+</div>
 `;
 
-});
-
 }
-
-async function drawChart(){
-
-const today =
-new Date()
-.toISOString()
-.split("T")[0];
-
-const result =
-await supabase
-.from("uploads")
-.select("*");
-
-const hours =
-Array(24).fill(0);
-
-result.data.forEach(item=>{
-
-const d =
-new Date(
-item.created_at
-);
-
-const day =
-d.toISOString()
-.split("T")[0];
-
-if(day===today){
-
-hours[
-d.getHours()
-]++;
-
-}
-
-});
-
-const canvas =
-document.getElementById(
-"chart"
-);
-
-const ctx =
-canvas.getContext("2d");
-
-ctx.clearRect(
-0,
-0,
-canvas.width,
-canvas.height
-);
-
-ctx.beginPath();
-
-for(
-let i=0;
-i<24;
-i++
-){
-
-const x =
-(i/23)
-*
-canvas.width;
-
-const y =
-canvas.height
--
-(
-hours[i]
-*
-15
-);
-
-if(i===0)
-ctx.moveTo(x,y);
-else
-ctx.lineTo(x,y);
-
-}
-
-ctx.lineWidth=3;
-ctx.strokeStyle="white";
-ctx.stroke();
-
-for(
-let i=0;
-i<24;
-i++
-){
-
-const x =
-(i/23)
-*
-canvas.width;
-
-ctx.fillText(
-i+":00",
-x,
-290
-);
-
-}
-
-}
-
-loadFiles();
-
-drawChart();
 
 </script>
 
