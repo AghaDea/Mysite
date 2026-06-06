@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ghost Media Cloud</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<style>
+:root{
+--bg:#03050f;
+--surface:#080d1a;
+--surface2:#0d1526;
+--cyan:#00e5ff;
+--pink:#ff2d78;
+--violet:#8b5cf6;
+--green:#00ffa3;
+--text:#f0f4ff;
+--muted:#4a5878;
+--border:rgba(255,255,255,0.06);
+--glow-c:rgba(0,229,255,0.15);
+--glow-p:rgba(255,45,120,0.15);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html{scroll-behavior:smooth}
+
+body{
+background:var(--bg);
+color:var(--text);
+font-family:'Syne',sans-serif;
+overflow-x:hidden;
+min-height:100vh;
+}
+
+/* ── CANVAS BG ── */
+#canvas-bg{
+position:fixed;
+inset:0;
+z-index:0;
+pointer-events:none;
+}
+
+/* ── GRID OVERLAY ── */
+.grid-overlay{
+position:fixed;
+inset:0;
+z-index:0;
+pointer-events:none;
+background-image:
+  linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
+background-size:60px 60px;
+}
+
+/* ── NOISE ── */
+.noise{
+position:fixed;
+inset:0;
+z-index:1;
+pointer-events:none;
+opacity:0.03;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+background-size:200px 200px;
+}
+
+/* ── NAV ── */
+.nav{
+position:sticky;
+top:0;
+z-index:100;
+height:72px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 32px;
+background:rgba(3,5,15,0.7);
+backdrop-filter:blur(24px);
+border-bottom:1px solid var(--border);
+}
+
+.logo{
+font-size:22px;
+font-weight:900;
+letter-spacing:0.08em;
+text-transform:uppercase;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.logo-mark{
+width:32px;height:32px;
+border-radius:8px;
+background:linear-gradient(135deg,var(--cyan),var(--pink));
+display:flex;align-items:center;justify-content:center;
+font-size:16px;
+}
+
+.logo-text{
+background:linear-gradient(90deg,var(--cyan) 0%,#a78bfa 50%,var(--pink) 100%);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.nav-right{
+display:flex;
+align-items:center;
+gap:16px;
+}
+
+.pill{
+padding:8px 16px;
+border-radius:100px;
+font-size:12px;
+font-weight:700;
+letter-spacing:0.1em;
+text-transform:uppercase;
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.pill-online{
+background:rgba(0,255,163,0.1);
+color:var(--green);
+border:1px solid rgba(0,255,163,0.2);
+}
+
+.pill-online::before{
+content:'';
+width:6px;height:6px;
+border-radius:50%;
+background:var(--green);
+box-shadow:0 0 8px var(--green);
+animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+0%,100%{opacity:1;transform:scale(1)}
+50%{opacity:0.5;transform:scale(0.8)}
+}
+
+.storage-badge{
+padding:8px 16px;
+border-radius:100px;
+font-size:12px;
+font-weight:700;
+letter-spacing:0.08em;
+background:rgba(139,92,246,0.1);
+color:#a78bfa;
+border:1px solid rgba(139,92,246,0.2);
+font-family:'Space Mono',monospace;
+}
+
+/* ── CONTAINER ── */
+.container{
+position:relative;
+z-index:2;
+width:92%;
+max-width:1100px;
+margin:0 auto;
+padding:40px 0 80px;
+}
+
+/* ── HERO ── */
+.hero{
+text-align:center;
+padding:60px 0 50px;
+}
+
+.hero-tag{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:8px 18px;
+border-radius:100px;
+background:rgba(0,229,255,0.06);
+border:1px solid rgba(0,229,255,0.15);
+font-size:12px;
+letter-spacing:0.15em;
+text-transform:uppercase;
+color:var(--cyan);
+margin-bottom:28px;
+font-family:'Space Mono',monospace;
+}
+
+.hero h1{
+font-size:clamp(42px,7vw,80px);
+font-weight:900;
+line-height:0.95;
+letter-spacing:-0.02em;
+}
+
+.hero h1 em{
+font-style:normal;
+background:linear-gradient(135deg,var(--cyan),var(--pink));
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.hero p{
+margin-top:20px;
+font-size:16px;
+color:var(--muted);
+letter-spacing:0.05em;
+font-family:'Space Mono',monospace;
+}
+
+/* ── UPLOAD BOX ── */
+.upload-box{
+background:var(--surface);
+border-radius:28px;
+border:1px solid var(--border);
+padding:28px;
+position:relative;
+overflow:hidden;
+}
+
+.upload-box::before{
+content:'';
+position:absolute;
+top:0;left:0;right:0;
+height:1px;
+background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+}
+
+/* ── DROP ZONE ── */
+.drop{
+height:280px;
+border:1.5px dashed rgba(0,229,255,0.25);
+border-radius:20px;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+cursor:pointer;
+transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+background:rgba(0,229,255,0.02);
+position:relative;
+overflow:hidden;
+gap:0;
+}
+
+.drop:hover,.drop.active{
+border-color:var(--cyan);
+background:rgba(0,229,255,0.06);
+transform:scale(1.005);
+}
+
+.drop::after{
+content:'';
+position:absolute;
+inset:0;
+background:radial-gradient(circle at 50% 50%,rgba(0,229,255,0.08),transparent 70%);
+opacity:0;
+transition:opacity 0.3s;
+pointer-events:none;
+}
+
+.drop:hover::after,.drop.active::after{
+opacity:1;
+}
+
+.drop-icon-wrap{
+width:80px;height:80px;
+border-radius:20px;
+background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(255,45,120,0.15));
+border:1px solid rgba(0,229,255,0.2);
+display:flex;align-items:center;justify-content:center;
+margin-bottom:20px;
+}
+
+.drop-icon-wrap svg{
+width:36px;height:36px;
+stroke:var(--cyan);
+stroke-width:1.5;
+fill:none;
+}
+
+.drop h2{
+font-size:22px;
+font-weight:800;
+letter-spacing:-0.01em;
+}
+
+.drop p{
+margin-top:8px;
+color:var(--muted);
+font-size:14px;
+font-family:'Space Mono',monospace;
+}
+
+.drop-cta{
+margin-top:16px;
+padding:10px 22px;
+border-radius:100px;
+background:linear-gradient(90deg,var(--cyan),var(--pink));
+color:#000;
+font-size:13px;
+font-weight:800;
+letter-spacing:0.06em;
+text-transform:uppercase;
+}
+
+input[type=file]{display:none}
+
+/* ── STATS GRID ── */
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+margin-top:16px;
+}
+
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+.stat{
+background:var(--surface2);
+border-radius:16px;
+padding:16px;
+border:1px solid var(--border);
+display:flex;
+flex-direction:column;
+gap:4px;
+}
+
+.stat-label{
+font-size:10px;
+font-weight:700;
+letter-spacing:0.15em;
+text-transform:uppercase;
+color:var(--muted);
+font-family:'Space Mono',monospace;
+}
+
+.stat-value{
+font-size:20px;
+font-weight:900;
+letter-spacing:-0.02em;
+background:linear-gradient(135deg,var(--cyan),#a78bfa);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+/* ── PROGRESS ── */
+.progress-wrap{
+margin-top:20px;
+display:none;
+background:var(--surface2);
+border-radius:16px;
+padding:20px;
+border:1px solid var(--border);
+}
+
+.progress-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:12px;
+}
+
+.progress-label{
+font-size:13px;
+font-weight:700;
+letter-spacing:0.05em;
+color:var(--text);
+font-family:'Space Mono',monospace;
+}
+
+.progress-pct{
+font-size:13px;
+font-weight:700;
+color:var(--cyan);
+font-family:'Space Mono',monospace;
+}
+
+.progress-track{
+height:6px;
+background:rgba(255,255,255,0.06);
+border-radius:100px;
+overflow:hidden;
+}
+
+.progress-bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,var(--cyan),var(--pink));
+border-radius:100px;
+transition:width 0.2s ease;
+position:relative;
+}
+
+.progress-bar::after{
+content:'';
+position:absolute;
+right:0;top:50%;
+transform:translateY(-50%);
+width:12px;height:12px;
+border-radius:50%;
+background:white;
+box-shadow:0 0 12px var(--cyan);
+}
+
+/* ── GALLERY ── */
+.gallery-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin:48px 0 20px;
+}
+
+.gallery-title{
+font-size:18px;
+font-weight:800;
+letter-spacing:0.05em;
+text-transform:uppercase;
+}
+
+.gallery-count{
+font-size:12px;
+font-family:'Space Mono',monospace;
+color:var(--muted);
+padding:6px 14px;
+border-radius:100px;
+background:var(--surface2);
+border:1px solid var(--border);
+}
+
+.gallery{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+gap:20px;
+}
+
+@media(max-width:700px){.gallery{grid-template-columns:1fr}}
+
+/* ── MEDIA CARD ── */
+.media-card{
+background:var(--surface);
+border-radius:22px;
+overflow:hidden;
+border:1px solid var(--border);
+animation:cardIn 0.4s cubic-bezier(0.4,0,0.2,1) both;
+transition:transform 0.2s,border-color 0.2s;
+}
+
+.media-card:hover{
+transform:translateY(-4px);
+border-color:rgba(0,229,255,0.2);
+}
+
+@keyframes cardIn{
+from{opacity:0;transform:translateY(24px) scale(0.97)}
+to{opacity:1;transform:none}
+}
+
+.media-card img,
+.media-card video{
+width:100%;
+height:220px;
+object-fit:cover;
+display:block;
+background:#000;
+}
+
+.audio-box{
+height:160px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#0d1526,#13082a);
+gap:12px;
+position:relative;
+overflow:hidden;
+}
+
+.audio-box::before{
+content:'';
+position:absolute;
+inset:0;
+background:radial-gradient(circle at 50% 50%,rgba(139,92,246,0.15),transparent 70%);
+}
+
+.audio-wave{
+display:flex;
+align-items:center;
+gap:3px;
+height:40px;
+}
+
+.audio-wave span{
+width:3px;
+border-radius:100px;
+background:linear-gradient(to top,var(--violet),var(--cyan));
+animation:wave 1s ease-in-out infinite;
+}
+
+.audio-wave span:nth-child(1){height:16px;animation-delay:0s}
+.audio-wave span:nth-child(2){height:28px;animation-delay:0.1s}
+.audio-wave span:nth-child(3){height:20px;animation-delay:0.2s}
+.audio-wave span:nth-child(4){height:36px;animation-delay:0.3s}
+.audio-wave span:nth-child(5){height:24px;animation-delay:0.4s}
+.audio-wave span:nth-child(6){height:32px;animation-delay:0.5s}
+.audio-wave span:nth-child(7){height:18px;animation-delay:0.6s}
+
+@keyframes wave{
+0%,100%{transform:scaleY(1)}
+50%{transform:scaleY(0.4)}
+}
+
+audio{
+width:calc(100% - 32px);
+height:32px;
+accent-color:var(--cyan);
+}
+
+.card-body{padding:20px}
+
+.type-badge{
+display:inline-flex;
+align-items:center;
+gap:5px;
+padding:4px 10px;
+border-radius:100px;
+font-size:10px;
+font-weight:800;
+letter-spacing:0.1em;
+text-transform:uppercase;
+font-family:'Space Mono',monospace;
+margin-bottom:12px;
+}
+
+.type-image{background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.2)}
+.type-video{background:rgba(255,45,120,0.1);color:var(--pink);border:1px solid rgba(255,45,120,0.2)}
+.type-audio{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.2)}
+
+.card-filename{
+font-size:15px;
+font-weight:700;
+word-break:break-all;
+line-height:1.3;
+margin-bottom:10px;
+}
+
+.card-meta{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-bottom:16px;
+}
+
+.meta-chip{
+padding:5px 10px;
+border-radius:8px;
+background:var(--surface2);
+font-size:11px;
+font-family:'Space Mono',monospace;
+color:var(--muted);
+border:1px solid var(--border);
+}
+
+.card-url{
+display:block;
+padding:10px 12px;
+border-radius:10px;
+background:var(--surface2);
+border:1px solid var(--border);
+color:var(--muted);
+font-size:11px;
+font-family:'Space Mono',monospace;
+word-break:break-all;
+text-decoration:none;
+line-height:1.5;
+margin-bottom:14px;
+transition:border-color 0.2s,color 0.2s;
+}
+
+.card-url:hover{
+border-color:rgba(0,229,255,0.3);
+color:var(--cyan);
+}
+
+.card-btns{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+}
+
+.btn{
+height:44px;
+border:none;
+border-radius:12px;
+font-size:13px;
+font-weight:800;
+letter-spacing:0.06em;
+text-transform:uppercase;
+cursor:pointer;
+transition:all 0.2s;
+display:flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+font-family:'Syne',sans-serif;
+}
+
+.btn:active{transform:scale(0.97)}
+
+.btn-copy{
+background:linear-gradient(135deg,var(--cyan),var(--pink));
+color:#000;
+}
+
+.btn-copy:hover{
+filter:brightness(1.1);
+box-shadow:0 0 20px rgba(0,229,255,0.3);
+}
+
+.btn-open{
+background:var(--surface2);
+color:var(--text);
+border:1px solid var(--border);
+}
+
+.btn-open:hover{
+border-color:rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.05);
+}
+
+.btn svg{
+width:14px;height:14px;
+stroke:currentColor;
+stroke-width:2;
+fill:none;
+}
+
+/* ── EMPTY STATE ── */
+.empty{
+text-align:center;
+padding:80px 20px;
+color:var(--muted);
+display:none;
+}
+
+.empty svg{
+width:64px;height:64px;
+stroke:var(--muted);
+stroke-width:1;
+fill:none;
+margin:0 auto 20px;
+display:block;
+opacity:0.4;
+}
+
+.empty p{
+font-size:14px;
+font-family:'Space Mono',monospace;
+}
+
+/* ── TOAST ── */
+.toast{
+position:fixed;
+bottom:28px;
+right:28px;
+padding:14px 22px;
+border-radius:14px;
+background:#000;
+border:1px solid rgba(0,255,163,0.4);
+color:var(--green);
+font-size:13px;
+font-weight:700;
+letter-spacing:0.05em;
+font-family:'Space Mono',monospace;
+z-index:999;
+display:flex;
+align-items:center;
+gap:8px;
+transform:translateY(80px);
+opacity:0;
+transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+pointer-events:none;
+}
+
+.toast.show{
+transform:translateY(0);
+opacity:1;
+}
+
+.toast-dot{
+width:8px;height:8px;
+border-radius:50%;
+background:var(--green);
+box-shadow:0 0 12px var(--green);
+}
+
+/* ── SCAN LINES ── */
+.scanlines{
+position:fixed;
+inset:0;
+z-index:1;
+pointer-events:none;
+background:repeating-linear-gradient(
+  0deg,
+  transparent,
+  transparent 2px,
+  rgba(0,0,0,0.03) 2px,
+  rgba(0,0,0,0.03) 4px
+);
+}
+
+@media(max-width:700px){
+.hero h1{font-size:clamp(32px,10vw,52px)}
+.nav{padding:0 16px}
+.nav .storage-badge{display:none}
+.container{width:96%;padding:20px 0 60px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+<div class="grid-overlay"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+
+<nav class="nav">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="logo-text">GHOST CLOUD</span>
+  </div>
+  <div class="nav-right">
+    <div class="pill pill-online">Online</div>
+    <div class="storage-badge">SUPABASE</div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="hero-tag">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Real-Time File Transfer
+    </div>
+    <h1>Upload Media<br><em>Without Limits</em></h1>
+    <p>Images · Videos · Music · Private Links · True Cloud</p>
+  </div>
+
+  <div class="upload-box">
+    <label class="drop" id="drop">
+      <div class="drop-icon-wrap">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h2>Drop Files Here</h2>
+      <p>Images · Videos · Music — Max 40MB</p>
+      <div class="drop-cta">Choose File</div>
+      <input type="file" id="fileInput" accept="image/*,video/*,audio/*">
+    </label>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">Max Size</span>
+        <span class="stat-value">40MB</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Formats</span>
+        <span class="stat-value">ALL</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Mode</span>
+        <span class="stat-value">LIVE</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Security</span>
+        <span class="stat-value">E2E</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span class="progress-label" id="uploading">Uploading...</span>
+        <span class="progress-pct" id="pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-bar" id="bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-header">
+    <span class="gallery-title">Uploads</span>
+    <span class="gallery-count" id="galleryCount">0 files</span>
+  </div>
+
+  <div class="empty" id="empty">
+    <svg viewBox="0 0 24 24">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+      <line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+    <p>No uploads yet — drop a file to get started</p>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-dot"></span>
+  Link copied to clipboard
+</div>
+
+<script>
+/* ═══════════════════════════════ */
+/*  ANIMATED BACKGROUND           */
+/* ═══════════════════════════════ */
+(function(){
+  const canvas = document.getElementById('canvas-bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles=[];
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  class Particle{
+    constructor(){this.reset()}
+    reset(){
+      this.x = Math.random()*W;
+      this.y = Math.random()*H;
+      this.size = Math.random()*1.5+0.3;
+      this.speedX = (Math.random()-0.5)*0.3;
+      this.speedY = (Math.random()-0.5)*0.3;
+      this.life = Math.random();
+      this.maxLife = Math.random()*0.8+0.2;
+      this.color = Math.random()>0.5 ? '0,229,255' : '255,45,120';
+    }
+    update(){
+      this.x+=this.speedX; this.y+=this.speedY;
+      this.life+=0.003;
+      if(this.life>this.maxLife||this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+    }
+    draw(){
+      const alpha = Math.sin((this.life/this.maxLife)*Math.PI)*0.6;
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${this.color},${alpha})`;
+      ctx.fill();
+    }
+  }
+
+  resize();
+  window.addEventListener('resize',resize);
+  for(let i=0;i<120;i++) particles.push(new Particle());
+
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{p.update();p.draw()});
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ═══════════════════════════════ */
+/*  CONFIG                        */
+/* ═══════════════════════════════ */
+const SUPABASE_URL = "https://tyxozdllmnfnonjirath.supabase.co";
+const SUPABASE_KEY = "sb_publishable_lI8fDXUKUYzqZKZ6KcDFVA_g9G0uztm";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ═══════════════════════════════ */
+/*  ELEMENTS                      */
+/* ═══════════════════════════════ */
+const input        = document.getElementById('fileInput');
+const drop         = document.getElementById('drop');
+const gallery      = document.getElementById('gallery');
+const progressWrap = document.getElementById('progressWrap');
+const bar          = document.getElementById('bar');
+const uploading    = document.getElementById('uploading');
+const pct          = document.getElementById('pct');
+const toast        = document.getElementById('toast');
+const empty        = document.getElementById('empty');
+const countEl      = document.getElementById('galleryCount');
+
+let fileCount = 0;
+
+function updateCount(){
+  fileCount++;
+  countEl.textContent = fileCount + (fileCount===1?' file':' files');
+  empty.style.display='none';
+}
+
+/* ═══════════════════════════════ */
+/*  DRAG & DROP                   */
+/* ═══════════════════════════════ */
+drop.onclick = e => { if(e.target!==input) input.click(); };
+
+drop.addEventListener('dragover', e => {
+  e.preventDefault();
+  drop.classList.add('active');
+});
+
+['dragleave','dragend'].forEach(ev =>
+  drop.addEventListener(ev, () => drop.classList.remove('active'))
+);
+
+drop.addEventListener('drop', e => {
+  e.preventDefault();
+  drop.classList.remove('active');
+  handleFile(e.dataTransfer.files[0]);
+});
+
+input.addEventListener('change', () => handleFile(input.files[0]));
+
+/* ═══════════════════════════════ */
+/*  UPLOAD                        */
+/* ═══════════════════════════════ */
+async function handleFile(file){
+  if(!file) return;
+
+  if(file.size > 40*1024*1024){
+    showToastError('File exceeds 40MB limit');
+    return;
+  }
+
+  const allowed = ['image/','video/','audio/'];
+  if(!allowed.some(t => file.type.startsWith(t))){
+    showToastError('Only image / video / audio files');
+    return;
+  }
+
+  progressWrap.style.display = 'block';
+  bar.style.width = '0%';
+  pct.textContent = '0%';
+  uploading.textContent = 'Uploading...';
+
+  let progress = 0;
+  const fake = setInterval(() => {
+    progress = Math.min(progress + 3, 88);
+    bar.style.width = progress + '%';
+    pct.textContent = progress + '%';
+  }, 80);
+
+  const ext = file.name.split('.').pop();
+  const random = Math.random().toString(36).substring(2,10);
+  const filename = Date.now() + '_' + random + '.' + ext;
+
+  const { error } = await client.storage.from('files').upload(filename, file);
+
+  clearInterval(fake);
+
+  if(error){
+    showToastError(error.message);
+    progressWrap.style.display = 'none';
+    return;
+  }
+
+  bar.style.width = '100%';
+  pct.textContent = '100%';
+  uploading.textContent = 'Complete!';
+
+  const { data } = client.storage.from('files').getPublicUrl(filename);
+  const url = data.publicUrl;
+
+  setTimeout(() => { progressWrap.style.display = 'none'; }, 1400);
+
+  createCard(url, file, filename);
+  updateCount();
+  input.value = '';
+}
+
+/* ═══════════════════════════════ */
+/*  CREATE CARD                   */
+/* ═══════════════════════════════ */
+function createCard(url, file, filename){
+  const card = document.createElement('div');
+  card.className = 'media-card';
+
+  let media = '';
+  let typeClass = '';
+  let typeLabel = '';
+
+  if(file.type.startsWith('image')){
+    media = `<img src="${url}" alt="${filename}" loading="lazy">`;
+    typeClass = 'type-image'; typeLabel = 'IMAGE';
+  } else if(file.type.startsWith('video')){
+    media = `<video controls preload="metadata"><source src="${url}" type="${file.type}"></video>`;
+    typeClass = 'type-video'; typeLabel = 'VIDEO';
+  } else {
+    media = `
+      <div class="audio-box">
+        <div class="audio-wave">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+        <audio controls><source src="${url}" type="${file.type}"></audio>
+      </div>`;
+    typeClass = 'type-audio'; typeLabel = 'AUDIO';
+  }
+
+  const size = (file.size/1024/1024).toFixed(2);
+  const shortMime = file.type.split('/')[1].toUpperCase();
+  const escapedUrl = url.replace(/'/g,"\\'");
+
+  card.innerHTML = `
+    ${media}
+    <div class="card-body">
+      <span class="type-badge ${typeClass}">${typeLabel}</span>
+      <div class="card-filename">${filename}</div>
+      <div class="card-meta">
+        <span class="meta-chip">${shortMime}</span>
+        <span class="meta-chip">${size} MB</span>
+      </div>
+      <a class="card-url" href="${url}" target="_blank">${url}</a>
+      <div class="card-btns">
+        <button class="btn btn-copy" onclick="copyLink('${escapedUrl}')">
+          <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <button class="btn btn-open" onclick="window.open('${escapedUrl}')">
+          <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open
+        </button>
+      </div>
+    </div>`;
+
+  gallery.prepend(card);
+}
+
+/* ═══════════════════════════════ */
+/*  COPY & TOAST                  */
+/* ═══════════════════════════════ */
+function copyLink(url){
+  navigator.clipboard.writeText(url).then(() => showToast());
+}
+
+function showToast(){
+  toast.style.background='#000';
+  toast.style.borderColor='rgba(0,255,163,0.4)';
+  toast.style.color='var(--green)';
+  toast.querySelector('.toast-dot').style.background='var(--green)';
+  toast.querySelector('span:last-child') || (toast.childNodes[1] && (toast.childNodes[1].textContent=' Link copied to clipboard'));
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function showToastError(msg){
+  toast.style.background='#0d0005';
+  toast.style.borderColor='rgba(255,45,120,0.4)';
+  toast.style.color='#ff2d78';
+  toast.querySelector('.toast-dot').style.background='#ff2d78';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+/* show empty state initially */
+if(gallery.children.length===0) empty.style.display='block';
+</script>
+</body>
+</html>
