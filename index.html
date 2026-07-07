@@ -5,20 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مانیتور Uptime</title>
   <style>
-    body { font-family: Tahoma; margin: 20px; background: #f4f4f4; }
-    input, button { padding: 10px; margin: 5px; font-size: 16px; }
-    button { background: #0066ff; color: white; border: none; cursor: pointer; }
-    #logs { margin-top: 20px; background: white; padding: 15px; border-radius: 8px; max-height: 70vh; overflow-y: auto; }
+    body { font-family: Tahoma; margin: 15px; background: #f8f9fa; }
+    h1 { text-align: center; }
+    input, button { padding: 12px; margin: 8px 0; font-size: 16px; width: 100%; border-radius: 8px; }
+    button { border: none; cursor: pointer; }
+    .start { background: #0066ff; color: white; }
+    .stop { background: #ff4444; color: white; }
+    .delete { background: #666; color: white; }
+    #logs { background: white; padding: 15px; border-radius: 8px; min-height: 300px; margin-top: 15px; }
+    .log { padding: 8px; border-bottom: 1px solid #eee; }
+    .progress { font-weight: bold; color: #0066ff; }
   </style>
 </head>
 <body>
   <h1>چک‌کننده وضعیت سایت</h1>
   
-  <input type="url" id="url" placeholder="https://example.com" style="width:300px">
-  <input type="number" id="count" value="10" min="1" placeholder="تعداد چک">
-  <input type="number" id="interval" value="5000" placeholder="فاصله (ms)">
-  <button onclick="startMonitoring()">شروع چک</button>
+  <input type="url" id="url" value="https://arsacia.ir" placeholder="لینک سایت">
+  
+  <input type="number" id="count" value="30" min="1" placeholder="تعداد چک (پیشفرض ۳۰)">
+  <input type="number" id="interval" value="2000" min="1000" placeholder="فاصله هر چک (میلی‌ثانیه) - ۲۰۰۰ = ۲ ثانیه">
+  
+  <button class="start" onclick="startMonitoring()">شروع چک سریع</button>
 
+  <div id="active-jobs"></div>
   <div id="logs"></div>
 
   <script type="module" src="script.js"></script>
