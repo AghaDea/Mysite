@@ -1,16 +1,16 @@
-name: Uptime Background Checker
+name: Uptime Fast Checker
 
 on:
   schedule:
-    - cron: '*/1 * * * *'      # هر ۳ دقیقه یک چک (می‌تونی تغییر بدی)
+    - cron: '*/1 * * * *'     # هر ۱ دقیقه (سریع‌ترین حالت ممکن در Actions)
   workflow_dispatch:
 
 jobs:
-  uptime-check:
+  fast-check:
     runs-on: ubuntu-latest
     
     steps:
-      - name: ارسال درخواست به Edge Function
+      - name: چک سریع سایت
         run: |
           curl -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/check-uptime" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
@@ -18,6 +18,6 @@ jobs:
             -d '{
               "job_id": 0,
               "target_url": "https://arsacia.ir",
-              "check_count": 1,
-              "interval_ms": 1000
+              "check_count": 5,
+              "interval_ms": 2000
             }'
