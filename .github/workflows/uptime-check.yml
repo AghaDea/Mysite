@@ -17,7 +17,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "job_id": 0,
-              "target_url": "https://arsacia.ir",
+              "target_url": "https://forum.arsacia.ir/profile/30928-dea/",
               "check_count": 5,
-              "interval_ms": 2000
+              "interval_ms": 1000
             }'
