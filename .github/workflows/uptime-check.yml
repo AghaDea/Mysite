@@ -2,7 +2,7 @@ name: Uptime Background Checker
 
 on:
   schedule:
-    - cron: '*/3 * * * *'      # هر ۳ دقیقه یک چک (می‌تونی تغییر بدی)
+    - cron: '*/1 * * * *'      # هر ۳ دقیقه یک چک (می‌تونی تغییر بدی)
   workflow_dispatch:
 
 jobs:
