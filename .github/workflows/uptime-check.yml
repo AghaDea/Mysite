@@ -2,21 +2,22 @@ name: Uptime Background Checker
 
 on:
   schedule:
-    - cron: '*/2 * * * *'     # هر ۲ دقیقه یکبار (می‌تونی تغییر بدی)
-  workflow_dispatch:          # امکان اجرای دستی
+    - cron: '*/3 * * * *'      # هر ۳ دقیقه یک چک (می‌تونی تغییر بدی)
+  workflow_dispatch:
 
 jobs:
-  check:
+  uptime-check:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: شروع چک از طریق Supabase Edge Function
+      - name: ارسال درخواست به Edge Function
         run: |
-          curl -X POST "https://YOUR-PROJECT.supabase.co/functions/v1/check-uptime" \
+          curl -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/check-uptime" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{
-              "job_id": 9999,
+              "job_id": 0,
               "target_url": "https://arsacia.ir",
               "check_count": 1,
-              "interval_ms": 2000
+              "interval_ms": 1000
             }'
