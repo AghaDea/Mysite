@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مانیتور Uptime</title>
+  <style>
+    body { font-family: Tahoma; margin: 20px; background: #f4f4f4; }
+    input, button { padding: 10px; margin: 5px; font-size: 16px; }
+    button { background: #0066ff; color: white; border: none; cursor: pointer; }
+    #logs { margin-top: 20px; background: white; padding: 15px; border-radius: 8px; max-height: 70vh; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>چک‌کننده وضعیت سایت</h1>
+  
+  <input type="url" id="url" placeholder="https://example.com" style="width:300px">
+  <input type="number" id="count" value="10" min="1" placeholder="تعداد چک">
+  <input type="number" id="interval" value="5000" placeholder="فاصله (ms)">
+  <button onclick="startMonitoring()">شروع چک</button>
+
+  <div id="logs"></div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
